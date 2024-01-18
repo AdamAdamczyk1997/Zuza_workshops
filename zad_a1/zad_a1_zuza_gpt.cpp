@@ -15,18 +15,27 @@ void print() const {
 
 };
 
-void insertionSort(vector<para>& p, bool ascending) {
-    for (size_t i = 1; i < p.size(); i++) {
-        para key = p[i];
-        int j = i - 1;
+int partition(vector<para>& p, int low, int high, bool ascending) {
+    para pivot = p[high];
+    int i = low - 1;
 
-        // Porównanie najpierw num, potem word
-        while (j >= 0 && ((ascending && (p[j].num > key.num || (p[j].num == key.num && p[j].word > key.word))) || 
-                          (!ascending && (p[j].num < key.num || (p[j].num == key.num && p[j].word < key.word))))) {
-            p[j + 1] = p[j];
-            j--;
+    for (int j = low; j <= high - 1; j++) {
+        if (ascending ? (p[j].num < pivot.num || (p[j].num == pivot.num && p[j].word < pivot.word)) 
+                      : (p[j].num > pivot.num || (p[j].num == pivot.num && p[j].word > pivot.word))) {
+            i++;
+            swap(p[i], p[j]);
         }
-        p[j + 1] = key;
+    }
+    swap(p[i + 1], p[high]);
+    return (i + 1);
+}
+
+void quickSort(vector<para>& p, int low, int high, bool ascending) {
+    if (low < high) {
+        int pi = partition(p, low, high, ascending);
+
+        quickSort(p, low, pi - 1, ascending);
+        quickSort(p, pi + 1, high, ascending);
     }
 }
 
@@ -49,7 +58,7 @@ int main() {
             pairs.emplace_back(n, w);
         }
 
-        insertionSort(pairs, order == '<');
+        quickSort(pairs, 0, pairs.size() - 1, true); // Dla sortowania rosnącego
 
         for (auto& p : pairs) {
             p.print();
