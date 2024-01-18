@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
-#include <memory>
+#include <stack>
+#include <climits>
+#include <utility>
 
 using namespace std;
 
@@ -16,16 +18,24 @@ public:
     Pixel(int x, int y) : x(x), y(y), isBad(false), visited(false), up(nullptr), down(nullptr), left(nullptr), right(nullptr) {}
 };
 
-void dfs(Pixel* pixel, pair<int, int>& minPixel) {
-    if (!pixel || pixel->visited || !pixel->isBad) return;
+void dfsIterative(Pixel* start, pair<int, int>& minPixel) {
+    stack<Pixel*> stack;
+    stack.push(start);
 
-    pixel->visited = true;
-    minPixel = min(minPixel, make_pair(pixel->y, pixel->x));
+    while (!stack.empty()) {
+        Pixel* pixel = stack.top();
+        stack.pop();
 
-    dfs(pixel->up, minPixel);
-    dfs(pixel->down, minPixel);
-    dfs(pixel->left, minPixel);
-    dfs(pixel->right, minPixel);
+        if (!pixel || pixel->visited || !pixel->isBad) continue;
+
+        pixel->visited = true;
+        minPixel = min(minPixel, make_pair(pixel->y, pixel->x));
+
+        stack.push(pixel->up);
+        stack.push(pixel->down);
+        stack.push(pixel->left);
+        stack.push(pixel->right);
+    }
 }
 
 int main() {
@@ -58,7 +68,7 @@ int main() {
             for (int x = 0; x < width_matrix; ++x) {
                 if (grid[y][x].isBad && !grid[y][x].visited) {
                     pair<int, int> minPixel = make_pair(INT_MAX, INT_MAX);
-                    dfs(&grid[y][x], minPixel);
+                    dfsIterative(&grid[y][x], minPixel);
                     representatives.push_back(minPixel);
                     count++;
                 }
